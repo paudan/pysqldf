@@ -4,6 +4,7 @@ import numpy as np
 from pandas.io.sql import to_sql, read_sql
 import re
 import os
+import inspect
 
 def _ensure_data_frame(obj, name):
     """
@@ -60,7 +61,7 @@ def _write_table(tablename, df, conn):
     to_sql(df, name=tablename, con=conn, flavor='sqlite')
 
 
-def sqldf(q, env, inmemory=True):
+def sqldf(q, env, inmemory=True, udfs={}, udafs={}):
     """
     query pandas data frames using sql syntax
 
@@ -71,9 +72,13 @@ def sqldf(q, env, inmemory=True):
     env: locals() or globals()
         variable environment; locals() or globals() in your function
         allows sqldf to access the variables in your python environment
-    dbtype: bool
-        memory/disk; default is in memory; if not memory then it will be 
+    inmemory: bool
+        memory/disk; default is in memory; if not memory then it will be
         temporarily persisted to disk
+    udfs: dictionary of functions
+        user defined functions
+    udafs: dictionary of aggregation classes
+        user defined aggregate functions
 
     Returns
     -------
@@ -99,6 +104,8 @@ def sqldf(q, env, inmemory=True):
         dbname = ".pandasql.db"
     # conn = sqlite.connect(dbname, detect_types=sqlite.PARSE_DECLTYPES)
     conn = sqlite.connect(dbname, detect_types=sqlite.PARSE_DECLTYPES|sqlite.PARSE_COLNAMES)
+    _set_udf(conn, udfs)
+    _set_udaf(conn, udafs)
     tables = _extract_table_names(q)
     for table in tables:
         if table not in env:
@@ -122,3 +129,12 @@ def sqldf(q, env, inmemory=True):
             os.remove(dbname)
     return result
 
+def _set_udf(conn, udfs):
+    for name, func in udfs.items():
+        num_params = len(inspect.getargspec(func).args)
+        conn.create_function(name, num_params, func)
+
+def _set_udaf(conn, udafs):
+    for name, agg_class in udafs.items():
+        num_params = len(inspect.getargspec(agg_class.step).args) - 1 # subtract self
+        conn.create_aggregate(name, num_params, agg_class)
