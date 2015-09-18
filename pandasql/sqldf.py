@@ -108,13 +108,14 @@ class SQLDF(object):
 if __name__ == '__main__':
     from pandas import DataFrame
 
-    df = DataFrame([
+    data = [
         ["hoge", 0,  1,  2,  3,  4],
         ["fuga", 5,  6,  7,  8,  9],
         ["hoge", 10, 11, 12, 13, 14],
         ["fuga", 15, 16, 17, 18, 19],
         ["hoge", 20, 21, 22, 23, 24]
-    ], columns=["label", "a", "b", "c", "d", "e"])
+    ]
+    df = DataFrame(data, columns=["label", "a", "b", "c", "d", "e"])
     class mysum(object):
         def __init__(self):
             self.count = 0
@@ -124,6 +125,11 @@ if __name__ == '__main__':
             return self.count
 
     sqldf = SQLDF(locals(), udfs={"half": lambda x: x / 2}, udafs={"mysum": mysum})
+    print(sqldf.execute("select * from data;"))
+    print(sqldf.execute("select sum(c1) from data;"))
+    print(sqldf.execute("select half(c1) from data;"))
+    print(sqldf.execute("select mysum(c2) from data;"))
+    print(sqldf.execute("select MySum(c2) from data;"))
     print(sqldf.execute("select * from df;"))
     print(sqldf.execute("select sum(a) from df;"))
     print(sqldf.execute("select half(a) from df;"))
