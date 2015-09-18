@@ -31,9 +31,6 @@ class SQLDF(object):
         tables = self._extract_table_names(query)
         for table in tables:
             if table not in self.env:
-                self.conn.close()
-                if not self.inmemory:
-                    os.remove(self._dbname)
                 raise Exception("%s not found" % table)
             df = self.env[table]
             df = self._ensure_data_frame(df, table)
