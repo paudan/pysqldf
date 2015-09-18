@@ -2,6 +2,7 @@ import pandas as pd
 from pandasql import SQLDF, load_meat, load_births
 import string
 import unittest
+import os
 
 
 class PandaSQLTest(unittest.TestCase):
@@ -128,11 +129,6 @@ class PandaSQLTest(unittest.TestCase):
         result = SQLDF(locals()).execute("SELECT date FROM births LIMIT 10;")
         self.assertEqual(len(result), 10)
 
-    def test_not_inmemory(self):
-        meat = load_meat()
-        result = SQLDF(locals(), inmemory=False).execute("SELECT * FROM meat LIMIT 10;")
-        self.assertEqual(len(result), 10)
-
     def test_nested_list(self):
         data = [[1,2,3], [4,5,6]]
         q = 'select * from data'
@@ -148,6 +144,18 @@ class PandaSQLTest(unittest.TestCase):
         self.assertEqual(len(result), 2)
         self.assertEqual(list(result.columns), ['c0', 'c1', 'c2'])
         self.assertEqual(list(result.index), [0, 1])
+
+    def test_nested_tuple(self):
+        data = ((1,2,3), (4,5,6))
+        q = 'select * from data'
+        sqldf = SQLDF(locals())
+        self.assertRaises(Exception, lambda: sqldf.execute(q))
+
+    def test_tuple_of_list(self):
+        data = ([1,2,3], [4,5,6])
+        q = 'select * from data'
+        sqldf = SQLDF(locals())
+        self.assertRaises(Exception, lambda: sqldf.execute(q))
 
     def test_list_of_dict(self):
         data = [{"a":1, "b":2, "c":3}, {"a":4, "b":5, "c":6}]
@@ -182,6 +190,14 @@ class PandaSQLTest(unittest.TestCase):
         self.assertEqual(list(result.columns), ["mycount"])
         self.assertEqual(list(result.index), [0])
         self.assertEqual(list(result["mycount"]), [1+4])
+
+    def test_no_table(self):
+        self.assertRaises(Exception, lambda: SQLDF(locals()).execute("select * from notable;"))
+
+    def test_invalid_colname(self):
+        data = [{"a": "valid", "(b)": "invalid"}]
+        sqldf = SQLDF(locals())
+        self.assertRaises(Exception, lambda: sqldf.execute("select * from data;"))
 
 
 if __name__=="__main__":
