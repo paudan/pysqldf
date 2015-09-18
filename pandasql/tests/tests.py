@@ -1,5 +1,5 @@
 import pandas as pd
-from pandasql import sqldf, load_meat
+from pandasql import SQLDF, load_meat
 import string
 import unittest
 
@@ -14,7 +14,7 @@ class PandaSQLTest(unittest.TestCase):
                  "letter_pos": [i for i in range(len(string.ascii_letters))],
                  "l2": list(string.ascii_letters)
         })
-        result = sqldf("select * from df LIMIT 10;", locals())
+        result = SQLDF(locals()).execute("select * from df LIMIT 10;")
         self.assertEqual(len(result), 10)
 
     def test_join(self):
@@ -29,7 +29,7 @@ class PandaSQLTest(unittest.TestCase):
             "letter": list(string.ascii_letters)
         })
 
-        result = sqldf("SELECT a.*, b.letter FROM df a INNER JOIN df2 b ON a.l2 = b.letter LIMIT 20;", locals())
+        result = SQLDF(locals()).execute("SELECT a.*, b.letter FROM df a INNER JOIN df2 b ON a.l2 = b.letter LIMIT 20;")
         self.assertEqual(len(result), 20)
 
     def test_query_with_spacing(self):
@@ -44,7 +44,7 @@ class PandaSQLTest(unittest.TestCase):
             "letter": list(string.ascii_letters)
         })
 
-        result = sqldf("SELECT a.*, b.letter FROM df a INNER JOIN df2 b ON a.l2 = b.letter LIMIT 20;", locals())
+        result = SQLDF(locals()).execute("SELECT a.*, b.letter FROM df a INNER JOIN df2 b ON a.l2 = b.letter LIMIT 20;")
         self.assertEqual(len(result), 20)
 
         q = """
@@ -57,34 +57,34 @@ class PandaSQLTest(unittest.TestCase):
         on a.l2 = b.letter
         LIMIT 20
         ;"""
-        result = sqldf(q, locals())
+        result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 20)
 
     def test_query_single_list(self):
 
         mylist = [i for i in range(10)]
 
-        result = sqldf("SELECT * FROM mylist", locals())
+        result = SQLDF(locals()).execute("SELECT * FROM mylist")
         self.assertEqual(len(result), 10)
 
     def test_query_list_of_lists(self):
 
         mylist = [[i for i in range(10)], [i for i in range(10)]]
 
-        result = sqldf("SELECT * FROM mylist", locals())
+        result = SQLDF(locals()).execute("SELECT * FROM mylist")
         self.assertEqual(len(result), 2)
 
     def test_query_list_of_tuples(self):
 
         mylist = [tuple([i for i in range(10)]), tuple([i for i in range(10)])]
 
-        result = sqldf("SELECT * FROM mylist", locals())
+        result = SQLDF(locals()).execute("SELECT * FROM mylist")
         self.assertEqual(len(result), 2)
 
     def test_subquery(self):
         kermit = pd.DataFrame({"x": range(10)})
         q = "select * from (select * from kermit) tbl limit 2;"
-        result = sqldf(q, locals())
+        result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 2)
 
     def test_in(self):
@@ -95,7 +95,7 @@ class PandaSQLTest(unittest.TestCase):
         }
         course_df = pd.DataFrame(courseData)
         q = "SELECT * FROM course_df WHERE courseCode IN ( 'TM351', 'TU100' );"
-        result = sqldf(q, locals())
+        result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 2)
 
     def test_in_with_subquery(self):
@@ -115,25 +115,25 @@ class PandaSQLTest(unittest.TestCase):
         q = '''
             SELECT * FROM course_df WHERE courseCode IN ( SELECT DISTINCT courseCode FROM program_df ) ;
           '''
-        result = sqldf(q, locals())
+        result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 3)
 
     def test_datetime_query(self):
         pysqldf = lambda q: sqldf(q, globals())
         meat = load_meat()
-        result = sqldf("SELECT * FROM meat LIMIT 10;", locals())
+        result = SQLDF(locals()).execute("SELECT * FROM meat LIMIT 10;")
         self.assertEqual(len(result), 10)
 
     def test_returning_none(self):
         pysqldf = lambda q: sqldf(q, globals())
         meat = load_meat()
-        result = sqldf("SELECT beef FROM meat LIMIT 10;", locals())
+        result = SQLDF(locals()).execute("SELECT beef FROM meat LIMIT 10;")
         self.assertEqual(len(result), 10)
 
     def test_nested_list(self):
         data = [[1,2,3], [4,5,6]]
         q = 'select * from data'
-        result = sqldf(q, locals())
+        result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 2)
         self.assertEqual(list(result.columns), ['c0', 'c1', 'c2'])
         self.assertEqual(list(result.index), [0, 1])
@@ -141,7 +141,7 @@ class PandaSQLTest(unittest.TestCase):
     def test_list_of_tuple(self):
         data = [(1,2,3), (4,5,6)]
         q = 'select * from data'
-        result = sqldf(q, locals())
+        result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 2)
         self.assertEqual(list(result.columns), ['c0', 'c1', 'c2'])
         self.assertEqual(list(result.index), [0, 1])
@@ -149,7 +149,7 @@ class PandaSQLTest(unittest.TestCase):
     def test_list_of_dict(self):
         data = [{"a":1, "b":2, "c":3}, {"a":4, "b":5, "c":6}]
         q = 'select * from data'
-        result = sqldf(q, locals())
+        result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 2)
         self.assertEqual(list(result.columns), ['a', 'b', 'c'])
         self.assertEqual(list(result.index), [0, 1])
