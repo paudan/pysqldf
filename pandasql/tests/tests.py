@@ -1,5 +1,5 @@
 import pandas as pd
-from pandasql import SQLDF, load_meat
+from pandasql import SQLDF, load_meat, load_births
 import string
 import unittest
 
@@ -119,15 +119,18 @@ class PandaSQLTest(unittest.TestCase):
         self.assertEqual(len(result), 3)
 
     def test_datetime_query(self):
-        pysqldf = lambda q: sqldf(q, globals())
         meat = load_meat()
         result = SQLDF(locals()).execute("SELECT * FROM meat LIMIT 10;")
         self.assertEqual(len(result), 10)
 
     def test_returning_none(self):
-        pysqldf = lambda q: sqldf(q, globals())
+        births = load_births()
+        result = SQLDF(locals()).execute("SELECT date FROM births LIMIT 10;")
+        self.assertEqual(len(result), 10)
+
+    def test_not_inmemory(self):
         meat = load_meat()
-        result = SQLDF(locals()).execute("SELECT beef FROM meat LIMIT 10;")
+        result = SQLDF(locals(), inmemory=False).execute("SELECT * FROM meat LIMIT 10;")
         self.assertEqual(len(result), 10)
 
     def test_nested_list(self):
@@ -154,7 +157,32 @@ class PandaSQLTest(unittest.TestCase):
         self.assertEqual(list(result.columns), ['a', 'b', 'c'])
         self.assertEqual(list(result.index), [0, 1])
 
+    def test_udf(self):
+        data = [{"a":1, "b":2, "c":3}, {"a":4, "b":5, "c":6}]
+        def ten(x):
+            return 10
+        result = SQLDF(locals(), udfs={"ten": ten}).execute("SELECT ten(a) AS ten FROM data;")
+        self.assertEqual(len(result), 2)
+        self.assertEqual(list(result.columns), ["ten"])
+        self.assertEqual(list(result.index), [0, 1])
+        self.assertEqual(list(result["ten"]), [10, 10])
+
+    def test_udaf(self):
+        data = [{"a":1, "b":2, "c":3}, {"a":4, "b":5, "c":6}]
+        class mycount(object):
+            def __init__(self):
+                super(mycount, self).__init__()
+                self.count = 0
+            def step(self, x):
+                self.count += x
+            def finalize(self):
+                return self.count
+        result = SQLDF(locals(), udafs={"mycount": mycount}).execute("SELECT mycount(a) AS mycount FROM data;")
+        self.assertEqual(len(result), 1)
+        self.assertEqual(list(result.columns), ["mycount"])
+        self.assertEqual(list(result.index), [0])
+        self.assertEqual(list(result["mycount"]), [1+4])
+
 
 if __name__=="__main__":
     unittest.main()
-
