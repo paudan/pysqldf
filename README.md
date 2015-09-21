@@ -21,7 +21,7 @@ Any convertable data to `pandas` DataFrames will be automatically detected by `p
 You can query them as you would any regular SQL table.
 
 
-```
+```python
 $ python
 >>> from pysqldf import SQLDF, load_meat, load_births
 >>> sqldf = SQLDF(globals())
@@ -34,10 +34,7 @@ $ python
 2  1944-03-01 00:00:00   741    90  1128               75     None          None   None
 3  1944-04-01 00:00:00   650    89   978               66     None          None   None
 4  1944-05-01 00:00:00   681   106  1029               78     None          None   None
-```
 
-joins and aggregations are also supported
-```
 >>> q = "SELECT m.date, m.beef, b.births FROM meat m INNER JOIN births b ON m.date = b.date;"
 >>> print sqldf.execute(q).head()
                     date    beef  births
@@ -57,13 +54,53 @@ joins and aggregations are also supported
 4  1948        8766
 ```
 
+user defined functions and user defined aggregate functions also supported.
+
+```python
+$ python
+>>> from pysqldf import SQLDF, load_meat
+>>> import math
+>>> import numpy
+>>> ceil = lambda x: math.ceil(x)
+>>> udfs={ "ceil": lambda x: math.ceil(x) }
+>>> class variance(object):
+...     def __init__(self):
+...         self.a = []
+...     def step(self, x):
+...         self.a.append(x)
+...     def finalize(self):
+...         return numpy.var(self.a)
+...
+>>> udafs={ "variance": variance }
+>>> meat = load_meat()
+>>> sqldf = SQLDF(globals(), udfs=udfs, udafs=udafs)
+>>> sqldf.execute("SELECT ceil(beef) FROM meat;").head()
+   ceil(beef)
+0         751
+1         713
+2         741
+3         650
+4         681
+>>> sqldf.execute("SELECT variance(beef) FROM meat;")
+   variance(beef)
+0   251397.009673
+```
+
 ## Documents
 
-### toplevel exports
+### `SQLDF(env, inmemory=True, udfs={}, udafs={})`
 
-#### `SQLDF`
+`env`: variable mapping dictionary of sql executed enviroment. key is sql variable name and value is your program variable. `locals()` or `globals()` is used for simple assign.
 
-#### `load_meat`, `load_births`
+`inmemory`: sqlite db option.
+
+`udfs`: dictionary of user defined functions. dictionary key is function name, dictionary value is function. see [sqlite3 document](https://docs.python.org/2.7/library/sqlite3.html#sqlite3.Connection.create_function)
+
+`udafs`: dictionary of user defined aggregate functions. dictionary key is function name, dictionary value is aggregate function(actually class). examples see below. see [sqlite3 document](https://docs.python.org/2.7/library/sqlite3.html#sqlite3.Connection.create_aggregate)
+
+### `load_meat()`, `load_births()`
+
+load example DataFrame data.
 
 ## test
 
