@@ -2,8 +2,6 @@ from distutils.core import setup
 from setuptools import find_packages
 
 
-required = []
-
 setup(
     name="pysqldf",
     version="0.0.1",
@@ -16,6 +14,13 @@ setup(
     package_data={"pysqldf": ["data/*.csv"]},
     description="sqldf for pandas",
     long_description=open("README.rst").read(),
-    install_requires=required,
+    install_requires=[
+        "numpy",
+        "pandas"
+    ],
+    tests_require=[
+        "pandas",
+        "nose"
+    ]
 )
 
