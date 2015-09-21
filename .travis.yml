@@ -5,10 +5,13 @@ python:
   - "3.2"
   - "3.3"
   - "3.4"
+addons:
+  apt:
+    packages:
+      - pandoc
 install:
-  - sudo apt-get install pandoc
   - pandoc -f markdown -t rst README.md > README.rst
   - python setup.py -q install
 script: nosetests -s -v --with-coverage --cover-package=pysqldf --cover-html
 cache: pip
-
+sudo: false
