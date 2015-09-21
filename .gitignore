@@ -36,3 +36,5 @@ cover
 .project
 .pydevproject
 *.swp
+
+README.rst
