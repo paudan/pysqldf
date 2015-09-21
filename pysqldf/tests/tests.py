@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 import pandas as pd
 from pysqldf import SQLDF, load_meat, load_births
 import string
