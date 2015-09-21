@@ -17,3 +17,9 @@ def load_births():
     filename = get_data("births_by_month.csv")
     df = pd.read_csv(filename, parse_dates=[0])
     return df
+
+__all__ = [
+    "SQLDF",
+    "load_meat",
+    "load_births"
+]
