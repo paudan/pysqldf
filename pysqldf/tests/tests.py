@@ -145,8 +145,8 @@ class SQLDFTest(unittest.TestCase):
 
     def test_returning_none(self):
         births = load_births()
-        result = SQLDF(locals()).execute("SELECT date FROM births LIMIT 10;")
-        self.assertEqual(len(result), 10)
+        result = SQLDF(locals()).execute("SELECT a FROM births LIMIT 10;")
+        self.assertEqual(result, None)
 
     def test_nested_list(self):
         data = [[1,2,3], [4,5,6]]
@@ -217,6 +217,13 @@ class SQLDFTest(unittest.TestCase):
         data = [{"a": "valid", "(b)": "invalid"}]
         sqldf = SQLDF(locals())
         self.assertRaises(Exception, lambda: sqldf.execute("select * from data;"))
+
+    def test_db_in_fs(self):
+        data = [{"a":1, "b":2, "c":3}, {"a":4, "b":5, "c":6}]
+        sqldf = SQLDF(locals(), inmemory=False)
+        self.assertEqual(os.path.exists(".pandasql.db"), True)
+        sqldf = None # run GC
+        self.assertEqual(os.path.exists(".pandasql.db"), False)
 
 
 if __name__=="__main__":

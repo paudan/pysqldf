@@ -118,4 +118,4 @@ load example DataFrame data.
 
 ## test
 
-`$ nosetests -s -v`
+`$ nosetests -s -v --with-coverage --cover-package=pysqldf --cover-html`
