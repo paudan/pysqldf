@@ -98,9 +98,13 @@ $ python
 
 `udafs`: dictionary of user defined aggregate functions. dictionary key is function name, dictionary value is aggregate function(actually class). examples see below. see [sqlite3 document](https://docs.python.org/2.7/library/sqlite3.html#sqlite3.Connection.create_aggregate)
 
-### `load_meat()`, `load_births()`
+### `load_iris()`, `load_meat()`, `load_births()`
 
 load example DataFrame data.
+
++ iris: [data description](https://archive.ics.uci.edu/ml/datasets/Iris)
++ meat: [data description](http://www.ers.usda.gov/data-products/livestock-meat-domestic-data.aspx)
++ births: [data description](http://data.un.org/Data.aspx?d=POP&f=tableCode:55)
 
 ## test
 
