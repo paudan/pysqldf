@@ -4,7 +4,7 @@ from setuptools import find_packages
 
 setup(
     name="pysqldf",
-    version="0.0.1",
+    version="1.0.0",
     author="Ryoji Ishii",
     author_email="airtoxin@icloud.com",
     url="https://github.com/airtoxin/pysqldf/",
