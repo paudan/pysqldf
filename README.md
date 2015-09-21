@@ -58,7 +58,7 @@ user defined functions and user defined aggregate functions also supported.
 
 ```python
 $ python
->>> from pysqldf import SQLDF, load_meat
+>>> from pysqldf import SQLDF, load_iris
 >>> import math
 >>> import numpy
 >>> ceil = lambda x: math.ceil(x)
@@ -72,18 +72,28 @@ $ python
 ...         return numpy.var(self.a)
 ...
 >>> udafs={ "variance": variance }
->>> meat = load_meat()
+>>> iris = load_iris()
 >>> sqldf = SQLDF(globals(), udfs=udfs, udafs=udafs)
->>> sqldf.execute("SELECT ceil(beef) FROM meat;").head()
-   ceil(beef)
-0         751
-1         713
-2         741
-3         650
-4         681
->>> sqldf.execute("SELECT variance(beef) FROM meat;")
-   variance(beef)
-0   251397.009673
+>>> sqldf.execute("""
+    SELECT
+        ceil(sepal_length) AS sepal_length,
+        ceil(sepal_width) AS sepal_width,
+        ceil(petal_length) AS petal_length,
+        ceil(petal_width) AS petal_width,
+        species
+    FROM iris;
+    """).head()
+   sepal_length  sepal_width  petal_length  petal_width      species
+0             6            4             2            1  Iris-setosa
+1             5            3             2            1  Iris-setosa
+2             5            4             2            1  Iris-setosa
+3             5            4             2            1  Iris-setosa
+4             5            4             2            1  Iris-setosa
+>>> sqldf.execute("SELECT species, variance(sepal_width) AS var FROM iris GROUP BY species;")
+           species       var
+0      Iris-setosa  0.142276
+1  Iris-versicolor  0.096500
+2   Iris-virginica  0.101924
 ```
 
 ## Documents
