@@ -1,5 +1,10 @@
 # pysqldf
 
+[![Build Status](https://travis-ci.org/airtoxin/pysqldf.svg)](https://travis-ci.org/airtoxin/pysqldf)
+[![PyPI Version](https://img.shields.io/pypi/v/pysqldf.svg)](https://pypi.python.org/pypi/pysqldf)
+[![PyPI Monthly Downloads](https://img.shields.io/pypi/dm/pysqldf.svg)](https://pypi.python.org/pypi/pysqldf)
+[![PyPI License](https://img.shields.io/pypi/l/pysqldf.svg)](https://pypi.python.org/pypi/pysqldf)
+
 `pysqldf` allows you to query `pandas` DataFrames using SQL syntax.
 It works similarly to `sqldf` in R.
 `pysqldf` seeks to provide a more familiar way of manipulating and cleaning data for people new to Python or `pandas`.
@@ -115,7 +120,3 @@ load example DataFrame data.
 + iris: [data description](https://archive.ics.uci.edu/ml/datasets/Iris)
 + meat: [data description](http://www.ers.usda.gov/data-products/livestock-meat-domestic-data.aspx)
 + births: [data description](http://data.un.org/Data.aspx?d=POP&f=tableCode:55)
-
-## test
-
-`$ nosetests -s -v --with-coverage --cover-package=pysqldf --cover-html`
