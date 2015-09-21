@@ -1,11 +1,11 @@
 import pandas as pd
-from pandasql import SQLDF, load_meat, load_births
+from pysqldf import SQLDF, load_meat, load_births
 import string
 import unittest
 import os
 
 
-class PandaSQLTest(unittest.TestCase):
+class SQLDFTest(unittest.TestCase):
 
     def setUp(self):
         return
