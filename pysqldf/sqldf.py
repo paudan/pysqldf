@@ -20,7 +20,7 @@ class SQLDF(object):
         if self.inmemory:
             self._dbname = ":memory:"
         else:
-            self._dbname = ".pandasql.db"
+            self._dbname = ".pysqldf.db"
         self.conn = sqlite.connect(self._dbname, detect_types=sqlite.PARSE_DECLTYPES|sqlite.PARSE_COLNAMES)
         self._set_udf(udfs)
         self._set_udaf(udafs)
@@ -52,7 +52,7 @@ class SQLDF(object):
     def _extract_table_names(self, query):
         "extracts table names from a sql query"
         # a good old fashioned regex. turns out this worked better than actually parsing the code
-        rgx = '(?:FROM|JOIN)\s+([A-Za-z0-9_]+)'
+        rgx = r'(?:from|join)\s+([a-z_][a-z0-9_]*)(?:\s|;|$|\))'
         tables = re.findall(rgx, query, re.IGNORECASE)
         return list(set(tables))
 
