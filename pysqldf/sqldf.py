@@ -4,7 +4,6 @@
 
 import sqlite3 as sqlite
 import pandas as pd
-import numpy as np
 from pandas.io.sql import to_sql, read_sql
 import re
 import os
@@ -70,12 +69,6 @@ class SQLDF(object):
             df.columns = columns
         except Exception:
             raise Exception("%s is not a convertable data to Dataframe" % name)
-
-        for col in df:
-            if df[col].dtype==np.int64:
-                df[col] = df[col].astype(np.float)
-            elif isinstance(df[col].get(0), pd.tslib.Timestamp):
-                df[col] = df[col].apply(lambda x: str(x))
 
         return df
 
