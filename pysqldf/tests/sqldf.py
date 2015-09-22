@@ -74,6 +74,11 @@ class SQLDFTest(unittest.TestCase):
         # table deleted
         self.assertRaises(sqlite3.OperationalError, lambda: sqldf.conn.execute(query))
 
+    def test_execute_method_returning_none(self):
+        births = load_births()
+        result = SQLDF(locals()).execute("select a from births limit 10;") # col a not exists
+        self.assertEqual(result, None)
+
     def test_execute_method_with_table_not_found(self):
         sqldf = SQLDF(self.default_env)
         self.assertRaises(Exception, lambda: sqldf.execute("select * from notable"))
@@ -86,7 +91,7 @@ class SQLDFTest(unittest.TestCase):
         # table deleted
         self.assertRaises(sqlite3.OperationalError, lambda: sqldf.conn.execute("select * from df;"))
 
-    def test_extract_table_names(self):
+    def test_extract_table_names_method(self):
         sqldf = SQLDF(self.default_env)
         tablenames = {
             "select * from df;": ["df"],
@@ -105,63 +110,67 @@ class SQLDFTest(unittest.TestCase):
         for query, tablename in tablenames.items():
             self.assertEqual(set(sqldf._extract_table_names(query)), set(tablename))
 
-    def test_ensure_data_frame_nested_list(self):
+    def test_ensure_data_frame_method_nested_list(self):
         data = [[1,2,3], [4,5,6]]
         result = SQLDF(locals())._ensure_data_frame(data, "df")
         self.assertEqual(len(result), 2)
         self.assertEqual(list(result.columns), ['c0', 'c1', 'c2'])
         self.assertEqual(list(result.index), [0, 1])
 
-    def test_ensure_data_frame_list_of_tuple(self):
+    def test_ensure_data_frame_method_list_of_tuple(self):
         data = [(1,2,3), (4,5,6)]
         result = SQLDF(locals())._ensure_data_frame(data, "df")
         self.assertEqual(len(result), 2)
         self.assertEqual(list(result.columns), ['c0', 'c1', 'c2'])
         self.assertEqual(list(result.index), [0, 1])
 
-    def test_ensure_data_frame_nested_tuple(self):
+    def test_ensure_data_frame_method_nested_tuple(self):
         data = ((1,2,3), (4,5,6))
         sqldf = SQLDF(locals())
         self.assertRaises(Exception, lambda: sqldf._ensure_data_frame(data, "df"))
 
-    def test_ensure_data_frame_tuple_of_list(self):
+    def test_ensure_data_frame_method_tuple_of_list(self):
         data = ([1,2,3], [4,5,6])
         sqldf = SQLDF(locals())
         self.assertRaises(Exception, lambda: sqldf._ensure_data_frame(data, "df"))
 
-    def test_ensure_data_frame_list_of_dict(self):
+    def test_ensure_data_frame_method_list_of_dict(self):
         data = [{"a":1, "b":2, "c":3}, {"a":4, "b":5, "c":6}]
         result = SQLDF(locals())._ensure_data_frame(data, "df")
         self.assertEqual(len(result), 2)
         self.assertEqual(list(result.columns), ['a', 'b', 'c'])
         self.assertEqual(list(result.index), [0, 1])
 
-    def test_write_table_col_with_left_bracket(self):
-        df = DataFrame([[1]], columns=["col("])
-        sqldf = SQLDF(locals())
-        self.assertRaises(Exception, lambda: sqldf._write_table("tbl", df))
-
-    def test_write_table_col_with_right_bracket(self):
-        df = DataFrame([[1]], columns=["co)l"])
-        sqldf = SQLDF(locals())
-        self.assertRaises(Exception, lambda: sqldf._write_table("tbl", df))
-
-    def test_write_table_col_with_right_bracket(self):
+    def test_write_table_method(self):
         df = DataFrame([[1,2],[3,4]], columns=["col1", "col2"])
         sqldf = SQLDF(locals())
         sqldf._write_table("tbl", df)
         # table created
         cursor = sqldf.conn.cursor()
-        cursor.execute("select * from tbl;")
-        print(cursor.fetchall())
+        sq_type, name, tbl_name, rootpage, sql = list(cursor.execute("select * from sqlite_master where type='table';"))[0]
+        self.assertEqual(name, "tbl")
 
+    def test_write_table_method_col_with_left_bracket(self):
+        df = DataFrame([[1]], columns=["col("])
+        sqldf = SQLDF(locals())
+        self.assertRaises(Exception, lambda: sqldf._write_table("tbl", df))
 
+    def test_write_table_method_col_with_right_bracket(self):
+        df = DataFrame([[1]], columns=["co)l"])
+        sqldf = SQLDF(locals())
+        self.assertRaises(Exception, lambda: sqldf._write_table("tbl", df))
 
+    def test_del_table_method(self):
+        sqldf = SQLDF(locals())
+        cursor = sqldf.conn.cursor()
+        # create table
+        cursor.execute("create table deltbl(col);")
+        sqldf._del_table(["deltbl"])
+        self.assertEqual(list(cursor.execute("select * from sqlite_master where type='table';")), [])
 
-    def test_returning_none(self):
-        births = load_births()
-        result = SQLDF(locals()).execute("SELECT a FROM births LIMIT 10;")
-        self.assertEqual(result, None)
+    def test_del_table_method_not_exist_table(self):
+        sqldf = SQLDF(locals())
+        self.assertRaises(sqlite3.OperationalError, lambda: sqldf._del_table(["deltblaaaaaaa"]))
 
     def test_udf(self):
         data = [{"a":1, "b":2, "c":3}, {"a":4, "b":5, "c":6}]
