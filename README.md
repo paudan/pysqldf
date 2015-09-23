@@ -67,16 +67,18 @@ $ python
 >>> import math
 >>> import numpy
 >>> ceil = lambda x: math.ceil(x)
->>> udfs={ "ceil": lambda x: math.ceil(x) }
->>> class variance(object):
-...     def __init__(self):
-...         self.a = []
-...     def step(self, x):
-...         self.a.append(x)
-...     def finalize(self):
-...         return numpy.var(self.a)
+>>> udfs = { "ceil": lambda x: math.ceil(x) }
+>>> udafs = { "variance": lambda values: numpy.var(values) }
+>>> # or you can also define aggregation function as class
+>>> # class variance(object):
+... #     def __init__(self):
+... #         self.a = []
+... #     def step(self, x):
+... #         self.a.append(x)
+... #     def finalize(self):
+... #         return numpy.var(self.a)
 ...
->>> udafs={ "variance": variance }
+>>> # udafs={ "variance": variance }
 >>> iris = load_iris()
 >>> sqldf = SQLDF(globals(), udfs=udfs, udafs=udafs)
 >>> sqldf.execute("""
@@ -111,7 +113,7 @@ $ python
 
 `udfs`: dictionary of user defined functions. dictionary key is function name, dictionary value is function. see [sqlite3 document](https://docs.python.org/2.7/library/sqlite3.html#sqlite3.Connection.create_function)
 
-`udafs`: dictionary of user defined aggregate functions. dictionary key is function name, dictionary value is aggregate function(actually class). examples see below. see [sqlite3 document](https://docs.python.org/2.7/library/sqlite3.html#sqlite3.Connection.create_aggregate)
+`udafs`: dictionary of user defined aggregate functions. dictionary key is function name, dictionary value is aggregate function or class. If value is function, function gets one argument that is list of column values and it should return aggregated a value. Another case(value is class), see [sqlite3 document](https://docs.python.org/2.7/library/sqlite3.html#sqlite3.Connection.create_aggregate).
 
 ### `load_iris()`, `load_meat()`, `load_births()`
 

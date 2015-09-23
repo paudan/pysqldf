@@ -172,6 +172,29 @@ class SQLDFTest(unittest.TestCase):
         sqldf = SQLDF(locals())
         self.assertRaises(sqlite3.OperationalError, lambda: sqldf._del_table(["deltblaaaaaaa"]))
 
+    def test_set_udf_method(self):
+        sqldf = SQLDF(locals())
+        conn = sqldf.conn
+        self.default_df.to_sql("df", conn)
+        sqldf._set_udf(self.default_udfs)
+        self.assertEqual(list(conn.execute("select udf1(label) from df;")), [("l1",), ("l2",), ("l3",)])
+
+    def test_set_udaf_method_with_agg_class(self):
+        sqldf = SQLDF(locals())
+        conn = sqldf.conn
+        self.default_df.to_sql("df", conn)
+        sqldf._set_udaf(self.default_udafs)
+        self.assertEqual(list(conn.execute("select udaf1(label) from df;")), [(3,)])
+
+    def test_set_udaf_method_with_agg_function(self):
+        sqldf = SQLDF(locals())
+        conn = sqldf.conn
+        self.default_df.to_sql("df", conn)
+        def agg_func(values):
+            return len(values)
+        sqldf._set_udaf({"mycount": agg_func})
+        self.assertEqual(list(conn.execute("select mycount(label) from df;")), [(3,)])
+
     def test_udf(self):
         data = [{"a":1, "b":2, "c":3}, {"a":4, "b":5, "c":6}]
         def ten(x):
@@ -192,7 +215,7 @@ class SQLDFTest(unittest.TestCase):
                 self.count += x
             def finalize(self):
                 return self.count
-        result = SQLDF(locals(), udafs={"mycount": mycount}).execute("SELECT mycount(a) AS mycount FROM data;")
+        result = SQLDF(locals(), udafs={"mycount": mycount}).execute("select mycount(a) as mycount from data;")
         self.assertEqual(len(result), 1)
         self.assertEqual(list(result.columns), ["mycount"])
         self.assertEqual(list(result.index), [0])
@@ -226,7 +249,7 @@ class QueryTest(unittest.TestCase):
                  "letter_pos": [i for i in range(len(string.ascii_letters))],
                  "l2": list(string.ascii_letters)
         })
-        result = SQLDF(locals()).execute("select * from df LIMIT 10;")
+        result = SQLDF(locals()).execute("select * from df limit 10;")
         self.assertEqual(len(result), 10)
 
     def test_join(self):
@@ -241,7 +264,7 @@ class QueryTest(unittest.TestCase):
             "letter": list(string.ascii_letters)
         })
 
-        result = SQLDF(locals()).execute("SELECT a.*, b.letter FROM df a INNER JOIN df2 b ON a.l2 = b.letter LIMIT 20;")
+        result = SQLDF(locals()).execute("select a.*, b.letter from df a inner join df2 b on a.l2 = b.letter limit 20;")
         self.assertEqual(len(result), 20)
 
     def test_query_with_spacing(self):
@@ -256,18 +279,18 @@ class QueryTest(unittest.TestCase):
             "letter": list(string.ascii_letters)
         })
 
-        result = SQLDF(locals()).execute("SELECT a.*, b.letter FROM df a INNER JOIN df2 b ON a.l2 = b.letter LIMIT 20;")
+        result = SQLDF(locals()).execute("select a.*, b.letter from df a inner join df2 b on a.l2 = b.letter limit 20;")
         self.assertEqual(len(result), 20)
 
         q = """
-            SELECT
+            select
             a.*
-        FROM
+        from
             df a
-        INNER JOIN
+        inner join
             df2 b
         on a.l2 = b.letter
-        LIMIT 20
+        limit 20
         ;"""
         result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 20)
@@ -276,21 +299,21 @@ class QueryTest(unittest.TestCase):
 
         mylist = [i for i in range(10)]
 
-        result = SQLDF(locals()).execute("SELECT * FROM mylist")
+        result = SQLDF(locals()).execute("select * from mylist")
         self.assertEqual(len(result), 10)
 
     def test_query_list_of_lists(self):
 
         mylist = [[i for i in range(10)], [i for i in range(10)]]
 
-        result = SQLDF(locals()).execute("SELECT * FROM mylist")
+        result = SQLDF(locals()).execute("select * from mylist")
         self.assertEqual(len(result), 2)
 
     def test_query_list_of_tuples(self):
 
         mylist = [tuple([i for i in range(10)]), tuple([i for i in range(10)])]
 
-        result = SQLDF(locals()).execute("SELECT * FROM mylist")
+        result = SQLDF(locals()).execute("select * from mylist")
         self.assertEqual(len(result), 2)
 
     def test_subquery(self):
@@ -306,7 +329,7 @@ class QueryTest(unittest.TestCase):
             'level':['3','1','2']
         }
         course_df = pd.DataFrame(courseData)
-        q = "SELECT * FROM course_df WHERE courseCode IN ( 'TM351', 'TU100' );"
+        q = "select * from course_df where courseCode in ( 'TM351', 'TU100' );"
         result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 2)
 
@@ -325,12 +348,12 @@ class QueryTest(unittest.TestCase):
         course_df = pd.DataFrame(courseData)
 
         q = '''
-            SELECT * FROM course_df WHERE courseCode IN ( SELECT DISTINCT courseCode FROM program_df ) ;
+            select * from course_df where courseCode in ( select distinct courseCode from program_df ) ;
           '''
         result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 3)
 
     def test_datetime_query(self):
         meat = load_meat()
-        result = SQLDF(locals()).execute("SELECT * FROM meat LIMIT 10;")
+        result = SQLDF(locals()).execute("select * from meat limit 10;")
         self.assertEqual(len(result), 10)

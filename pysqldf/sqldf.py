@@ -96,9 +96,18 @@ class SQLDF(object):
 
     def _set_udaf(self, udafs):
         for name, agg_class in udafs.items():
+            if inspect.isfunction(agg_class):
+                agg_class = self._create_agg_class(agg_class)
             num_params = len(inspect.getargspec(agg_class.step).args) - 1 # subtract self
             self.conn.create_aggregate(name, num_params, agg_class)
 
+    def _create_agg_class(self, agg_function):
+        # return anonymous class
+        return type("", (), {
+            "__init__": lambda self: setattr(self, "l", []),
+            "step": lambda self, x: self.l.append(x),
+            "finalize": lambda self: agg_function(self.l)
+        })
 
 if __name__ == '__main__':
     from pandas import DataFrame
