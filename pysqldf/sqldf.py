@@ -4,7 +4,6 @@
 
 import sqlite3 as sqlite
 import pandas as pd
-import numpy as np
 from pandas.io.sql import to_sql, read_sql
 import re
 import os
@@ -21,7 +20,7 @@ class SQLDF(object):
         if self.inmemory:
             self._dbname = ":memory:"
         else:
-            self._dbname = ".pandasql.db"
+            self._dbname = ".pysqldf.db"
         self.conn = sqlite.connect(self._dbname, detect_types=sqlite.PARSE_DECLTYPES|sqlite.PARSE_COLNAMES)
         self._set_udf(udfs)
         self._set_udaf(udafs)
@@ -53,7 +52,7 @@ class SQLDF(object):
     def _extract_table_names(self, query):
         "extracts table names from a sql query"
         # a good old fashioned regex. turns out this worked better than actually parsing the code
-        rgx = '(?:FROM|JOIN)\s+([A-Za-z0-9_]+)'
+        rgx = r'(?:from|join)\s+([a-z_][a-z0-9_]*)(?:\s|;|$|\))'
         tables = re.findall(rgx, query, re.IGNORECASE)
         return list(set(tables))
 
@@ -71,12 +70,6 @@ class SQLDF(object):
         except Exception:
             raise Exception("%s is not a convertable data to Dataframe" % name)
 
-        for col in df:
-            if df[col].dtype==np.int64:
-                df[col] = df[col].astype(np.float)
-            elif isinstance(df[col].get(0), pd.tslib.Timestamp):
-                df[col] = df[col].apply(lambda x: str(x))
-
         return df
 
     def _write_table(self, tablename, df):
@@ -88,7 +81,8 @@ class SQLDF(object):
                 msg += "http://www.sqlite.org/lang_keywords.html"
                 raise Exception(msg)
 
-        to_sql(df, name=tablename, con=self.conn, flavor='sqlite')
+        dtype = dict((k, str(v)) for k, v in dict(df.dtypes).items())
+        to_sql(df, name=tablename, con=self.conn, flavor='sqlite', dtype=dtype)
 
     def _del_table(self, tablenames):
         for tablename in tablenames:

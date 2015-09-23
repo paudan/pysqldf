@@ -15,7 +15,6 @@ setup(
     description="sqldf for pandas",
     long_description=open("README.rst").read(),
     install_requires=[
-        "numpy",
         "pandas"
     ],
     tests_require=[
