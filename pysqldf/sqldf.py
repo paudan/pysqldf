@@ -102,7 +102,8 @@ class SQLDF(object):
             self.conn.create_aggregate(name, num_params, agg_class)
 
     def _create_agg_class(self, agg_function):
-        return type(agg_function.__name__, (), {
+        # return anonymous class
+        return type("", (), {
             "__init__": lambda self: setattr(self, "l", []),
             "step": lambda self, x: self.l.append(x),
             "finalize": lambda self: agg_function(self.l)
