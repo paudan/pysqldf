@@ -81,7 +81,7 @@ class SQLDF(object):
                 msg += "http://www.sqlite.org/lang_keywords.html"
                 raise Exception(msg)
 
-        dtype = { k: str(v) for k, v in dict(df.dtypes).items() }
+        dtype = dict((k, str(v)) for k, v in dict(df.dtypes).items())
         to_sql(df, name=tablename, con=self.conn, flavor='sqlite', dtype=dtype)
 
     def _del_table(self, tablenames):
