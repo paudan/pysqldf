@@ -12,6 +12,23 @@ import inspect
 
 class SQLDF(object):
     def __init__(self, env, inmemory=True, udfs={}, udafs={}):
+        """SQLDF constructor
+        Args:
+            env (dict): variable mapping dictionary of sql executed enviroment.
+                key is assign as sql variable name, value is your program's variable.
+                `locals()` or `globals()` is used for simply assignment.
+            inmemory (bool): True if inmemory db is used, False uses actual file system db.
+            udfs (dict): user defined function mapping dictionary of sql executed enviroment.
+                key is assign as sql function name, value is your program's sql function.
+                more details, see sqlite document.
+                https://docs.python.org/2.7/library/sqlite3.html#sqlite3.Connection.create_function
+            udafs (dict): user defined aggregate function mapping dictionary of sql executed enviroment.
+                key is assign as sql function name, value is your program's sql function (or class).
+                if you want to use function definition, that function takes 1 argument that is list of
+                column values and it should return 1 value.
+                class definition details are on sqlite document.
+                https://docs.python.org/2.7/library/sqlite3.html#sqlite3.Connection.create_aggregate
+        """
         super(SQLDF, self).__init__()
         self.env = env
         self.inmemory = inmemory
@@ -31,6 +48,13 @@ class SQLDF(object):
             os.remove(self._dbname)
 
     def execute(self, query):
+        """execute SQL
+        Args:
+            query (str): the query that you want to execute
+        Returns:
+            DataFrame or None: If query execution is succeeded,
+            returns DataFrame else None.
+        """
         tables = self._extract_table_names(query)
         for table in tables:
             if table not in self.env:
