@@ -11,6 +11,7 @@ import inspect
 
 
 class SQLDF(object):
+
     def __init__(self, env, inmemory=True, udfs={}, udafs={}):
         """SQLDF constructor
         Args:
@@ -38,7 +39,9 @@ class SQLDF(object):
             self._dbname = ":memory:"
         else:
             self._dbname = ".pysqldf.db"
-        self.conn = sqlite.connect(self._dbname, detect_types=sqlite.PARSE_DECLTYPES|sqlite.PARSE_COLNAMES)
+        self.conn = sqlite.connect(
+            self._dbname,
+            detect_types=sqlite.PARSE_DECLTYPES | sqlite.PARSE_COLNAMES)
         self._set_udf(udfs)
         self._set_udaf(udafs)
 
@@ -75,7 +78,8 @@ class SQLDF(object):
 
     def _extract_table_names(self, query):
         "extracts table names from a sql query"
-        # a good old fashioned regex. turns out this worked better than actually parsing the code
+        # a good old fashioned regex. turns out this worked better than
+        # actually parsing the code
         rgx = r'(?:from|join)\s+([a-z_][a-z0-9_]*)(?:\s|;|$|\))'
         tables = re.findall(rgx, query, re.IGNORECASE)
         return list(set(tables))
@@ -122,7 +126,9 @@ class SQLDF(object):
         for name, agg_class in udafs.items():
             if inspect.isfunction(agg_class):
                 agg_class = self._create_agg_class(agg_class)
-            num_params = len(inspect.getargspec(agg_class.step).args) - 1 # subtract self
+            num_params = len(
+                inspect.getargspec(
+                    agg_class.step).args) - 1  # subtract self
             self.conn.create_aggregate(name, num_params, agg_class)
 
     def _create_agg_class(self, agg_function):
@@ -137,22 +143,32 @@ if __name__ == '__main__':
     from pandas import DataFrame
 
     data = [
-        ["hoge", 0,  1,  2,  3,  4],
-        ["fuga", 5,  6,  7,  8,  9],
+        ["hoge", 0, 1, 2, 3, 4],
+        ["fuga", 5, 6, 7, 8, 9],
         ["hoge", 10, 11, 12, 13, 14],
         ["fuga", 15, 16, 17, 18, 19],
         ["hoge", 20, 21, 22, 23, 24]
     ]
     df = DataFrame(data, columns=["label", "a", "b", "c", "d", "e"])
+
     class mysum(object):
+
         def __init__(self):
             self.count = 0
+
         def step(self, val):
             self.count += val
+
         def finalize(self):
             return self.count
 
-    sqldf = SQLDF(locals(), udfs={"half": lambda x: x / 2}, udafs={"mysum": mysum})
+    sqldf = SQLDF(
+        locals(),
+        udfs={
+            "half": lambda x: x /
+            2},
+        udafs={
+            "mysum": mysum})
     print(sqldf.execute("select * from data;"))
     print(sqldf.execute("select sum(c1) from data;"))
     print(sqldf.execute("select half(c1) from data;"))
