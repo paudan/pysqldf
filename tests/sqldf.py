@@ -114,14 +114,14 @@ class SQLDFTest(unittest.TestCase):
         data = [[1,2,3], [4,5,6]]
         result = SQLDF(locals())._ensure_data_frame(data, "df")
         self.assertEqual(len(result), 2)
-        self.assertEqual(list(result.columns), ['c0', 'c1', 'c2'])
+        self.assertEqual(list(result.columns), ["c0", "c1", "c2"])
         self.assertEqual(list(result.index), [0, 1])
 
     def test_ensure_data_frame_method_list_of_tuple(self):
         data = [(1,2,3), (4,5,6)]
         result = SQLDF(locals())._ensure_data_frame(data, "df")
         self.assertEqual(len(result), 2)
-        self.assertEqual(list(result.columns), ['c0', 'c1', 'c2'])
+        self.assertEqual(list(result.columns), ["c0", "c1", "c2"])
         self.assertEqual(list(result.index), [0, 1])
 
     def test_ensure_data_frame_method_nested_tuple(self):
@@ -138,7 +138,7 @@ class SQLDFTest(unittest.TestCase):
         data = [{"a":1, "b":2, "c":3}, {"a":4, "b":5, "c":6}]
         result = SQLDF(locals())._ensure_data_frame(data, "df")
         self.assertEqual(len(result), 2)
-        self.assertEqual(list(result.columns), ['a', 'b', 'c'])
+        self.assertEqual(list(result.columns), ["a", "b", "c"])
         self.assertEqual(list(result.index), [0, 1])
 
     def test_write_table_method(self):
@@ -324,32 +324,32 @@ class QueryTest(unittest.TestCase):
 
     def test_in(self):
         courseData = {
-            'courseCode': ['TM351','TU100','M269'],
-            'points':[30,60,30],
-            'level':['3','1','2']
+            "courseCode": ["TM351","TU100","M269"],
+            "points":[30,60,30],
+            "level":["3","1","2"]
         }
         course_df = pd.DataFrame(courseData)
-        q = "select * from course_df where courseCode in ( 'TM351', 'TU100' );"
+        q = "select * from course_df where courseCode in ( "TM351", "TU100" );"
         result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 2)
 
     def test_in_with_subquery(self):
         programData = {
-            'courseCode': ['TM351','TM351','TM351','TU100','TU100','TU100','M269','M269','M269'],
-            'programCode':['AB1','AB2','AB3','AB1','AB3','AB4','AB3','AB4','AB5']
+            "courseCode": ["TM351","TM351","TM351","TU100","TU100","TU100","M269","M269","M269"],
+            "programCode":["AB1","AB2","AB3","AB1","AB3","AB4","AB3","AB4","AB5"]
              }
         program_df = pd.DataFrame(programData)
 
         courseData = {
-            'courseCode': ['TM351','TU100','M269'],
-            'points':[30,60,30],
-            'level':['3','1','2']
+            "courseCode": ["TM351","TU100","M269"],
+            "points":[30,60,30],
+            "level":["3","1","2"]
         }
         course_df = pd.DataFrame(courseData)
 
-        q = '''
+        q = """
             select * from course_df where courseCode in ( select distinct courseCode from program_df ) ;
-          '''
+          """
         result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 3)
 
