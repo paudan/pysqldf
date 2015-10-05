@@ -68,8 +68,8 @@ class SQLDF(object):
 
         try:
             result = read_sql(query, self.conn, index_col=None)
-            if 'index' in result:
-                del result['index']
+            if "index" in result:
+                del result["index"]
         except Exception:
             result = None
         finally:
@@ -80,7 +80,7 @@ class SQLDF(object):
         "extracts table names from a sql query"
         # a good old fashioned regex. turns out this worked better than
         # actually parsing the code
-        rgx = r'(?:from|join)\s+([a-z_][a-z0-9_]*)(?:\s|;|$|\))'
+        rgx = r"(?:from|join)\s+([a-z_][a-z0-9_]*)(?:\s|;|$|\))"
         tables = re.findall(rgx, query, re.IGNORECASE)
         return list(set(tables))
 
@@ -110,7 +110,7 @@ class SQLDF(object):
                 raise Exception(msg)
 
         dtype = dict((k, str(v)) for k, v in dict(df.dtypes).items())
-        to_sql(df, name=tablename, con=self.conn, flavor='sqlite', dtype=dtype)
+        to_sql(df, name=tablename, con=self.conn, flavor="sqlite", dtype=dtype)
 
     def _del_table(self, tablenames):
         for tablename in tablenames:
@@ -139,7 +139,7 @@ class SQLDF(object):
             "finalize": lambda self: agg_function(self.l)
         })
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from pandas import DataFrame
 
     data = [
