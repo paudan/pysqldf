@@ -393,7 +393,7 @@ class QueryTest(unittest.TestCase):
             "level": ["3", "1", "2"]
         }
         course_df = pd.DataFrame(courseData)
-        q = "select * from course_df where courseCode in ( "TM351", "TU100" );"
+        q = "select * from course_df where courseCode in ( 'TM351', 'TU100' );"
         result = SQLDF(locals()).execute(q)
         self.assertEqual(len(result), 2)
 
