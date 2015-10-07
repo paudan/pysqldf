@@ -59,14 +59,14 @@ class SQLDF(object):
             returns DataFrame else None.
         """
         tables = self._extract_table_names(query)
-        for table in tables:
-            if table not in self.env:
-                raise Exception("%s not found" % table)
-            df = self.env[table]
-            df = self._ensure_data_frame(df, table)
-            self._write_table(table, df)
-
         try:
+            for table in tables:
+                if table not in self.env:
+                    raise Exception("%s not found" % table)
+                df = self.env[table]
+                df = self._ensure_data_frame(df, table)
+                self._write_table(table, df)
+
             result = read_sql(query, self.conn, index_col=None)
             if "index" in result:
                 del result["index"]

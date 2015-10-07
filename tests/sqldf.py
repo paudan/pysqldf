@@ -194,6 +194,15 @@ class SQLDFTest(unittest.TestCase):
         sqldf = SQLDF(locals())
         self.assertRaises(Exception, lambda: sqldf._write_table("tbl", df))
 
+    def test_write_table_method_garbage_table(self):
+        df = [[1, 2], [3, [4]]]
+        sqldf = SQLDF(locals())
+        self.assertRaises(Exception, lambda: sqldf._write_table("tbl", df))
+        # table destroyed
+        cursor = sqldf.conn.cursor()
+        tablemaster = list(cursor.execute("select * from sqlite_master where type='table';"))
+        self.assertEqual(tablemaster, [])
+
     def test_del_table_method(self):
         sqldf = SQLDF(locals())
         cursor = sqldf.conn.cursor()
