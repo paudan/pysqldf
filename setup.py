@@ -10,7 +10,7 @@ setup(
     author_email="airtoxin@icloud.com",
     url="https://github.com/airtoxin/pysqldf/",
     license="MIT",
-    packages=find_packages(),
+    packages=find_packages(exclude=["tests*"]),
     package_dir={"pysqldf": "pysqldf"},
     package_data={"pysqldf": ["data/*.csv"]},
     description="sqldf for pandas",
