@@ -1,14 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import ast
+import re
 from setuptools import setup, find_packages
+
+with open("pysqldf/__init__.py", "rb") as f:
+    version = str(ast.literal_eval(re.search(
+        r"__version__\s+=\s+(.*)",
+        f.read().decode("utf-8")).group(1)
+    ))
 
 setup(
     name="pysqldf",
-    version="1.2.2",
+    version=version,
     author="Ryoji Ishii",
     author_email="airtoxin@icloud.com",
-    url="https://github.com/airtoxin/pysqldf/",
+    url="https://github.com/airtoxin/pysqldf",
     license="MIT",
     packages=find_packages(exclude=["tests*"]),
     package_dir={"pysqldf": "pysqldf"},
