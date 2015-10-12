@@ -4,6 +4,7 @@ include README.md
 include README.rst
 include setup.py
 
+recursive-include tests *
 recursive-include pysqldf/data *
 
 global-exclude *.so
