@@ -3,7 +3,7 @@
 
 import ast
 import re
-from setuptools import setup, find_packages
+from setuptools import setup
 
 with open("pysqldf/__init__.py", "rb") as f:
     version = str(ast.literal_eval(re.search(
@@ -18,7 +18,7 @@ setup(
     author_email="airtoxin@icloud.com",
     url="https://github.com/airtoxin/pysqldf",
     license="MIT",
-    packages=find_packages(exclude=["tests*"]),
+    packages=["pysqldf"],
     package_dir={"pysqldf": "pysqldf"},
     package_data={"pysqldf": ["data/*.csv"]},
     description="sqldf for pandas",
@@ -27,7 +27,6 @@ setup(
         "pandas"
     ],
     tests_require=[
-        "pandas",
         "nose"
     ],
     keywords="sqldf pandas dataframe sql pandasql",
@@ -45,4 +44,3 @@ setup(
         "Topic :: Utilities"
     ]
 )
-
