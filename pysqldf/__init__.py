@@ -5,7 +5,7 @@
 from .sqldf import SQLDF
 from .load import load_iris, load_meat, load_births
 
-__version__ = "1.2.2"
+__version__ = "1.2.3"
 __all__ = [
     "SQLDF",
     "load_iris",
