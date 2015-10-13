@@ -1,7 +1,8 @@
 #!/bin/bash
 
 pandoc -f markdown -t rst README.md > README.rst
-python setup.py sdist # check egg and dist files
+python setup.py sdist # create compressed source file
+python setup.py bdist_wheel # create wheel file
 
 # test pypi upload
 python setup.py register -r https://testpypi.python.org/pypi
@@ -12,4 +13,4 @@ python setup.py sdist upload -r https://testpypi.python.org/pypi
 
 # pypi upload
 # python setup.py register
-# python setup.py sdist upload
+# twine upload dist/*

@@ -1,15 +1,24 @@
-from distutils.core import setup
-from setuptools import find_packages
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+import ast
+import re
+from setuptools import setup
+
+with open("pysqldf/__init__.py", "rb") as f:
+    version = str(ast.literal_eval(re.search(
+        r"__version__\s+=\s+(.*)",
+        f.read().decode("utf-8")).group(1)
+    ))
 
 setup(
     name="pysqldf",
-    version="1.2.2",
+    version=version,
     author="Ryoji Ishii",
     author_email="airtoxin@icloud.com",
-    url="https://github.com/airtoxin/pysqldf/",
+    url="https://github.com/airtoxin/pysqldf",
     license="MIT",
-    packages=find_packages(),
+    packages=["pysqldf"],
     package_dir={"pysqldf": "pysqldf"},
     package_data={"pysqldf": ["data/*.csv"]},
     description="sqldf for pandas",
@@ -18,7 +27,6 @@ setup(
         "pandas"
     ],
     tests_require=[
-        "pandas",
         "nose"
     ],
     keywords="sqldf pandas dataframe sql pandasql",
@@ -36,4 +44,3 @@ setup(
         "Topic :: Utilities"
     ]
 )
-
