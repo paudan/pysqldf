@@ -101,12 +101,7 @@ class SQLDFTest(unittest.TestCase):
 
     def test_execute_method_with_table_not_found(self):
         sqldf = SQLDF(self.default_env)
-        self.assertRaises(
-            Exception,
-            lambda: sqldf.execute("select * from notable"))
-        # table deleted
-        self.assertRaises(sqlite3.OperationalError,
-                          lambda: sqldf.conn.execute("select * from df;"))
+        self.assertIsNone(sqldf.execute("select * from notable;"))
 
     def test_execute_method_with_query_error(self):
         sqldf = SQLDF(self.default_env)
@@ -214,13 +209,6 @@ class SQLDFTest(unittest.TestCase):
                 cursor.execute("select * from sqlite_master where type='table';")),
             [])
 
-    def test_del_table_method_not_exist_table(self):
-        sqldf = SQLDF(locals())
-        self.assertRaises(
-            sqlite3.OperationalError,
-            lambda: sqldf._del_table(
-                ["deltblaaaaaaa"]))
-
     def test_set_udf_method(self):
         sqldf = SQLDF(locals())
         conn = sqldf.conn
@@ -288,16 +276,12 @@ class SQLDFTest(unittest.TestCase):
         self.assertEqual(list(result["mycount"]), [1 + 4])
 
     def test_no_table(self):
-        self.assertRaises(
-            Exception, lambda: SQLDF(
-                locals()).execute("select * from notable;"))
+        self.assertIsNone(SQLDF(locals()).execute("select * from notable;"))
 
     def test_invalid_colname(self):
         data = [{"a": "valid", "(b)": "invalid"}]
         sqldf = SQLDF(locals())
-        self.assertRaises(
-            Exception,
-            lambda: sqldf.execute("select * from data;"))
+        self.assertIsNone(sqldf.execute("select * from data;"))
 
     def test_db_in_fs(self):
         data = [{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]
