@@ -110,17 +110,17 @@ class SQLDF(object):
                 raise Exception(msg)
 
         dtype = dict((k, str(v)) for k, v in dict(df.dtypes).items())
-        to_sql(df, name=tablename, con=self.conn, flavor="sqlite", dtype=dtype)
+        to_sql(df, name=tablename, con=self.conn, dtype=dtype)
 
     def _del_table(self, tablenames):
         for tablename in tablenames:
             try:
-		        self.conn.execute("drop table if exists " + tablename)
-			except OperationalError:
-			    try:
-			        self.conn.execute("drop table " + tablename)
-			    except OperationalError:
-			        pass	
+                self.conn.execute("drop table if exists " + tablename)
+            except OperationalError:
+                try:
+                    self.conn.execute("drop table " + tablename)
+                except OperationalError:
+                    pass	
         self.conn.commit()
 
     def _set_udf(self, udfs):
