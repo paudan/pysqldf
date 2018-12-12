@@ -114,7 +114,13 @@ class SQLDF(object):
 
     def _del_table(self, tablenames):
         for tablename in tablenames:
-            self.conn.execute("drop table " + tablename)
+            try:
+		        self.conn.execute("drop table if exists " + tablename)
+			except OperationalError:
+			    try:
+			        self.conn.execute("drop table " + tablename)
+			    except OperationalError:
+			        pass	
         self.conn.commit()
 
     def _set_udf(self, udfs):
