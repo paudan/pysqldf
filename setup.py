@@ -13,7 +13,10 @@ with open("pysqldf/__init__.py", "rb") as f:
     ))
 
 py_ver = sys.version_info
-old_python = (py_ver.major == 2 and py_ver.minor == 6) or (py_ver.major == 3 and py_ver.minor == 3)
+try:
+    old_python = (py_ver.major == 2 and py_ver.minor == 6) or (py_ver.major == 3 and py_ver.minor == 3)
+except AttributeError:  # Python 2.6
+    old_python = True
 
 setup(
     name="pysqldf",
