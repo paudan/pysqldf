@@ -61,12 +61,11 @@ class SQLDF(object):
         tables = self._extract_table_names(query)
         try:
             for table in tables:
-                if table not in self.env:
-                    raise Exception("%s not found" % table)
+                if table not in self.env:   # Skip if not found in env
+                    continue
                 df = self.env[table]
                 df = self._ensure_data_frame(df, table)
                 self._write_table(table, df)
-
             result = read_sql(query, self.conn, index_col=None)
             if "index" in result:
                 del result["index"]
@@ -78,8 +77,7 @@ class SQLDF(object):
 
     def _extract_table_names(self, query):
         "extracts table names from a sql query"
-        # a good old fashioned regex. turns out this worked better than
-        # actually parsing the code
+        # a good old fashioned regex. turns out this worked better than actually parsing the code
         rgx = r"(?:from|join)\s+([a-z_][a-z0-9_]*)(?:\s|;|$|\))"
         tables = re.findall(rgx, query, re.IGNORECASE)
         return list(set(tables))
@@ -87,7 +85,6 @@ class SQLDF(object):
     def _ensure_data_frame(self, obj, name):
         """
         obj a python object to be converted to a DataFrame
-
         take an object and make sure that it's a pandas data frame
         """
         try:
@@ -96,7 +93,7 @@ class SQLDF(object):
                        for i, col in enumerate(df.columns)]
             df.columns = columns
         except Exception:
-            raise Exception("%s is not a convertable data to Dataframe" % name)
+            raise Exception("{} is not a convertable data to Dataframe".format(name))
 
         return df
 
@@ -116,11 +113,11 @@ class SQLDF(object):
         for tablename in tablenames:
             try:
                 self.conn.execute("drop table if exists " + tablename)
-            except OperationalError:
+            except sqlite.OperationalError:
                 try:
                     self.conn.execute("drop table " + tablename)
-                except OperationalError:
-                    pass	
+                except sqlite.OperationalError as exc:
+                    pass
         self.conn.commit()
 
     def _set_udf(self, udfs):
